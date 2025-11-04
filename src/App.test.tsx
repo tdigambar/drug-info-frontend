@@ -71,13 +71,9 @@ describe('App - Filtering Tests', () => {
       expect(screen.getByText('vorinostat (ZOLINZA)')).toBeInTheDocument();
     });
 
-    // Find and click the company filter dropdown
-    const filterSelect = screen.getByLabelText('Filter by Company');
-    await userEvent.click(filterSelect);
-
-    // Select a company
-    const merckOption = screen.getByText('Merck Sharp & Dohme Corp.');
-    await userEvent.click(merckOption);
+    // Find and select the company filter dropdown
+    const filterSelect = screen.getByLabelText('Filter by Company') as HTMLSelectElement;
+    await userEvent.selectOptions(filterSelect, 'Merck Sharp & Dohme Corp.');
 
     // Verify that fetchDrugs was called with the selected company
     await waitFor(() => {
@@ -126,13 +122,9 @@ describe('App - Filtering Tests', () => {
       expect(screen.getByText('vorinostat (ZOLINZA)')).toBeInTheDocument();
     });
 
-    // Click on filter dropdown
-    const filterSelect = screen.getByLabelText('Filter by Company');
-    await userEvent.click(filterSelect);
-
-    // Select "All Companies"
-    const allOption = screen.getByText('All Companies');
-    await userEvent.click(allOption);
+    // Select "All Companies" from filter dropdown
+    const filterSelect = screen.getByLabelText('Filter by Company') as HTMLSelectElement;
+    await userEvent.selectOptions(filterSelect, 'all');
 
     // Verify that fetchDrugs was called without a company filter (or with undefined)
     await waitFor(() => {
@@ -148,12 +140,11 @@ describe('App - Filtering Tests', () => {
       expect(screen.getByText('Drug Information')).toBeInTheDocument();
     });
 
-    // Click on filter dropdown
-    const filterSelect = screen.getByLabelText('Filter by Company');
-    await userEvent.click(filterSelect);
-
     // Check that all companies are in the dropdown
-    expect(screen.getByText('Bayer AG')).toBeInTheDocument();
-    expect(screen.getByText('Merck Sharp & Dohme Corp.')).toBeInTheDocument();
+    const filterSelect = screen.getByLabelText('Filter by Company') as HTMLSelectElement;
+    const options = Array.from(filterSelect.options).map(option => option.text);
+    expect(options).toContain('All Companies');
+    expect(options).toContain('Bayer AG');
+    expect(options).toContain('Merck Sharp & Dohme Corp.');
   });
 });

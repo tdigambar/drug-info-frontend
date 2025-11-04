@@ -1,12 +1,4 @@
 import React from 'react';
-import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-  Box
-} from '@mui/material';
 
 interface CompanyFilterProps {
   companies: string[];
@@ -19,32 +11,33 @@ const CompanyFilter: React.FC<CompanyFilterProps> = ({
   selectedCompany,
   onCompanyChange
 }) => {
-  const handleChange = (event: SelectChangeEvent<string>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onCompanyChange(event.target.value);
   };
 
   return (
-    <Box sx={{ minWidth: 300, mb: 3 }}>
-      <FormControl fullWidth>
-        <InputLabel id="company-filter-label">Filter by Company</InputLabel>
-        <Select
-          labelId="company-filter-label"
-          id="company-filter"
-          value={selectedCompany}
-          label="Filter by Company"
-          onChange={handleChange}
-        >
-          <MenuItem value="all">All Companies</MenuItem>
-          {companies.map((company) => (
-            <MenuItem key={company} value={company}>
-              {company}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Box>
+    <div className="mb-6 min-w-[300px] max-w-md">
+      <label
+        htmlFor="company-filter"
+        className="block text-sm font-medium text-gray-700 mb-2"
+      >
+        Filter by Company
+      </label>
+      <select
+        id="company-filter"
+        value={selectedCompany}
+        onChange={handleChange}
+        className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      >
+        <option value="all">All Companies</option>
+        {companies.map((company) => (
+          <option key={company} value={company}>
+            {company}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 };
 
 export default CompanyFilter;
-

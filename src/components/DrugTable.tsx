@@ -1,15 +1,4 @@
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Box,
-  Typography
-} from '@mui/material';
 import { Drug, TableColumn } from '../types';
 import { formatLaunchDate } from '../utils/dateFormatter';
 
@@ -39,58 +28,55 @@ const DrugTable: React.FC<DrugTableProps> = ({ drugs, columns, onCompanyClick })
 
   if (drugs.length === 0) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="body1" color="text.secondary">
-          No drugs found
-        </Typography>
-      </Box>
+      <div className="p-6 text-center text-gray-600">
+        No drugs found
+      </div>
     );
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="drug information table">
-        <TableHead>
-          <TableRow>
+    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
             {columns.map((column) => (
-              <TableCell key={column.id} sx={{ fontWeight: 'bold' }}>
+              <th
+                key={column.id}
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 {column.label}
-              </TableCell>
+              </th>
             ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
           {drugs.map((drug) => (
-            <TableRow key={drug.id} hover>
+            <tr
+              key={drug.id}
+              className="hover:bg-gray-50 transition-colors"
+            >
               {columns.map((column) => {
                 const isCompany = column.id === 'company';
                 return (
-                  <TableCell
+                  <td
                     key={column.id}
-                    sx={{
-                      cursor: isCompany ? 'pointer' : 'default',
-                      color: isCompany ? 'primary.main' : 'inherit',
-                      textDecoration: isCompany ? 'underline' : 'none',
-                      '&:hover': isCompany
-                        ? {
-                            backgroundColor: 'action.hover',
-                            textDecoration: 'underline'
-                          }
-                        : {}
-                    }}
+                    className={`px-6 py-4 whitespace-nowrap text-sm ${
+                      isCompany
+                        ? 'text-blue-600 underline cursor-pointer hover:text-blue-800'
+                        : 'text-gray-900'
+                    }`}
                     onClick={() => isCompany && onCompanyClick(drug.company)}
                   >
                     {getCellValue(drug, column.id)}
-                  </TableCell>
+                  </td>
                 );
               })}
-            </TableRow>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </tbody>
+      </table>
+    </div>
   );
 };
 
 export default DrugTable;
-

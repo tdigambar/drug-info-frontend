@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, CircularProgress, Alert } from '@mui/material';
 import DrugTable from './components/DrugTable';
 import CompanyFilter from './components/CompanyFilter';
 import { Drug, TableConfig } from './types';
@@ -60,25 +59,25 @@ function App() {
 
   if (loading && drugs.length === 0) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Container>
+      <div className="container mx-auto mt-16 flex justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
     );
   }
 
   if (error && drugs.length === 0) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
+      <div className="container mx-auto mt-16 px-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Drug Information
-      </Typography>
+    <div className="container mx-auto mt-16 mb-16 px-4 max-w-7xl">
+      <h1 className="text-4xl font-bold mb-8">Drug Information</h1>
       
       <CompanyFilter
         companies={companies}
@@ -87,15 +86,15 @@ function App() {
       />
       
       {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-          <CircularProgress size={24} />
-        </Box>
+        <div className="flex justify-center mb-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+        </div>
       )}
       
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
-        </Alert>
+        </div>
       )}
       
       {tableConfig && (
@@ -105,7 +104,7 @@ function App() {
           onCompanyClick={handleCompanyClick}
         />
       )}
-    </Container>
+    </div>
   );
 }
 
