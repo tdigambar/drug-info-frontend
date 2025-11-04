@@ -62,8 +62,6 @@ describe('App - Filtering Tests', () => {
   });
 
   it('should filter drugs by company when selecting from dropdown', async () => {
-    const filteredDrugs = mockDrugs.filter(drug => drug.company === 'Merck Sharp & Dohme Corp.');
-
     render(<App />);
 
     // Wait for initial data to load
@@ -71,47 +69,59 @@ describe('App - Filtering Tests', () => {
       expect(screen.getByText('vorinostat (ZOLINZA)')).toBeInTheDocument();
     });
 
-    // Find and select the company filter dropdown
-    const filterSelect = screen.getByLabelText('Filter by Company') as HTMLSelectElement;
-    await userEvent.selectOptions(filterSelect, 'Merck Sharp & Dohme Corp.');
+    // Find and click the dropdown button
+    const filterButton = screen.getByRole('button');
+    await userEvent.click(filterButton);
+
+    // Wait for dropdown to open and find the company option
+    const companyOption = await screen.findByRole('option', { 
+      name: 'Merck Sharp & Dohme Corp.' 
+    });
+    await userEvent.click(companyOption);
 
     // Verify that fetchDrugs was called with the selected company
     await waitFor(() => {
       expect(mockFetchDrugs).toHaveBeenCalledWith('Merck Sharp & Dohme Corp.');
-    });
-
-    // Update mock to return filtered results
-    mockFetchDrugs.mockResolvedValueOnce(filteredDrugs);
-
-    // Re-render to show filtered results (this would happen in real app)
-    // For testing purposes, we verify the API was called with correct filter
-    expect(mockFetchDrugs).toHaveBeenCalledWith('Merck Sharp & Dohme Corp.');
+    }, { timeout: 3000 });
   });
 
   it('should filter drugs by company when clicking on company cell in table', async () => {
     render(<App />);
 
-    // Wait for initial data to load
+    // Wait for initial data to load and all effects to complete
     await waitFor(() => {
       expect(screen.getByText('Merck Sharp & Dohme Corp.')).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
 
-    // Find all company cells (there should be multiple)
-    const companyCells = screen.getAllByText('Merck Sharp & Dohme Corp.');
-    
-    // Click on the first company cell in the table
-    const firstCompanyCell = companyCells.find(cell => 
-      cell.closest('tr') !== null
-    );
-    
-    if (firstCompanyCell) {
-      await userEvent.click(firstCompanyCell);
+    // Wait for all initial API calls to complete
+    await waitFor(() => {
+      expect(mockFetchDrugs).toHaveBeenCalled();
+    }, { timeout: 3000 });
 
-      // Verify that the selected company was set and fetchDrugs was called
-      await waitFor(() => {
-        expect(mockFetchDrugs).toHaveBeenCalledWith('Merck Sharp & Dohme Corp.');
-      });
-    }
+    // Give a small delay to ensure all effects have settled
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Clear previous calls after initial load
+    mockFetchDrugs.mockClear();
+
+    // Find the company text in the table (it's inside a clickable td)
+    const companyTextElements = screen.getAllByText('Merck Sharp & Dohme Corp.');
+    expect(companyTextElements.length).toBeGreaterThan(0);
+    
+    // Click on the first company text element
+    // The click will bubble up to the parent <td> which has the onClick handler
+    await userEvent.click(companyTextElements[0]);
+
+    // Verify that fetchDrugs was called with the selected company
+    await waitFor(() => {
+      const calls = mockFetchDrugs.mock.calls;
+      const hasCompanyCall = calls.some(call => call[0] === 'Merck Sharp & Dohme Corp.');
+      if (!hasCompanyCall) {
+        throw new Error('fetchDrugs was not called with the company name');
+      }
+    }, { timeout: 3000 });
+    
+    expect(mockFetchDrugs).toHaveBeenCalledWith('Merck Sharp & Dohme Corp.');
   });
 
   it('should show all drugs when "All Companies" is selected', async () => {
@@ -122,14 +132,20 @@ describe('App - Filtering Tests', () => {
       expect(screen.getByText('vorinostat (ZOLINZA)')).toBeInTheDocument();
     });
 
-    // Select "All Companies" from filter dropdown
-    const filterSelect = screen.getByLabelText('Filter by Company') as HTMLSelectElement;
-    await userEvent.selectOptions(filterSelect, 'all');
+    // Click the dropdown button
+    const filterButton = screen.getByRole('button');
+    await userEvent.click(filterButton);
 
-    // Verify that fetchDrugs was called without a company filter (or with undefined)
+    // Wait for dropdown to open and click "All Companies" option
+    const allCompaniesOption = await screen.findByRole('option', { 
+      name: 'All Companies' 
+    });
+    await userEvent.click(allCompaniesOption);
+
+    // Verify that fetchDrugs was called
     await waitFor(() => {
       expect(mockFetchDrugs).toHaveBeenCalled();
-    });
+    }, { timeout: 3000 });
   });
 
   it('should display all company names in the filter dropdown', async () => {
@@ -140,11 +156,16 @@ describe('App - Filtering Tests', () => {
       expect(screen.getByText('Drug Information')).toBeInTheDocument();
     });
 
-    // Check that all companies are in the dropdown
-    const filterSelect = screen.getByLabelText('Filter by Company') as HTMLSelectElement;
-    const options = Array.from(filterSelect.options).map(option => option.text);
-    expect(options).toContain('All Companies');
-    expect(options).toContain('Bayer AG');
-    expect(options).toContain('Merck Sharp & Dohme Corp.');
+    // Click the dropdown button to open it
+    const filterButton = screen.getByRole('button');
+    await userEvent.click(filterButton);
+
+    // Wait for dropdown to open and check that all companies are visible
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'All Companies' })).toBeInTheDocument();
+    });
+    
+    expect(screen.getByRole('option', { name: 'Bayer AG' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Merck Sharp & Dohme Corp.' })).toBeInTheDocument();
   });
 });

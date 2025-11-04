@@ -67,6 +67,8 @@ const CompanyFilter: React.FC<CompanyFilterProps> = ({
           <div className="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none">
             <div
               onClick={() => handleSelect('all')}
+              role="option"
+              aria-selected={selectedCompany === 'all'}
               className={`cursor-pointer select-none relative py-2 pl-4 pr-4 ${
                 selectedCompany === 'all'
                   ? 'bg-blue-50 text-blue-900'
@@ -79,6 +81,8 @@ const CompanyFilter: React.FC<CompanyFilterProps> = ({
               <div
                 key={company}
                 onClick={() => handleSelect(company)}
+                role="option"
+                aria-selected={selectedCompany === company}
                 className={`cursor-pointer select-none relative py-2 pl-4 pr-4 ${
                   selectedCompany === company
                     ? 'bg-blue-50 text-blue-900'
