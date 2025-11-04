@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DrugTable from './components/DrugTable';
 import CompanyFilter from './components/CompanyFilter';
+import Pagination from './components/Pagination';
 import { Drug, TableConfig } from './types';
 import { fetchTableConfig, fetchDrugs, fetchCompanies } from './services/api';
+
+const ITEMS_PER_PAGE = 50;
 
 function App() {
   const [drugs, setDrugs] = useState<Drug[]>([]);
@@ -11,6 +14,7 @@ function App() {
   const [selectedCompany, setSelectedCompany] = useState<string>('all');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
     const loadData = async () => {
@@ -43,6 +47,7 @@ function App() {
         setLoading(true);
         const drugsData = await fetchDrugs(selectedCompany === 'all' ? undefined : selectedCompany);
         setDrugs(drugsData);
+        setCurrentPage(1); // Reset to first page when filter changes
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load drugs');
       } finally {
@@ -52,6 +57,23 @@ function App() {
 
     loadDrugs();
   }, [selectedCompany]);
+
+  // Calculate pagination
+  const paginatedDrugs = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return drugs.slice(startIndex, endIndex);
+  }, [drugs, currentPage]);
+
+  const totalPages = Math.ceil(drugs.length / ITEMS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      // Scroll to top of table when page changes
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const handleCompanyClick = (company: string) => {
     setSelectedCompany(company);
@@ -98,11 +120,18 @@ function App() {
       )}
       
       {tableConfig && (
-        <DrugTable
-          drugs={drugs}
-          columns={tableConfig.columns}
-          onCompanyClick={handleCompanyClick}
-        />
+        <>
+          <DrugTable
+            drugs={paginatedDrugs}
+            columns={tableConfig.columns}
+            onCompanyClick={handleCompanyClick}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </>
       )}
     </div>
   );
