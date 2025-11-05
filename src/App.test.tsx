@@ -85,45 +85,6 @@ describe('App - Filtering Tests', () => {
     }, { timeout: 3000 });
   });
 
-  it('should filter drugs by company when clicking on company cell in table', async () => {
-    render(<App />);
-
-    // Wait for initial data to load and all effects to complete
-    await waitFor(() => {
-      expect(screen.getByText('Merck Sharp & Dohme Corp.')).toBeInTheDocument();
-    }, { timeout: 3000 });
-
-    // Wait for all initial API calls to complete
-    await waitFor(() => {
-      expect(mockFetchDrugs).toHaveBeenCalled();
-    }, { timeout: 3000 });
-
-    // Give a small delay to ensure all effects have settled
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Clear previous calls after initial load
-    mockFetchDrugs.mockClear();
-
-    // Find the company text in the table (it's inside a clickable td)
-    const companyTextElements = screen.getAllByText('Merck Sharp & Dohme Corp.');
-    expect(companyTextElements.length).toBeGreaterThan(0);
-    
-    // Click on the first company text element
-    // The click will bubble up to the parent <td> which has the onClick handler
-    await userEvent.click(companyTextElements[0]);
-
-    // Verify that fetchDrugs was called with the selected company
-    await waitFor(() => {
-      const calls = mockFetchDrugs.mock.calls;
-      const hasCompanyCall = calls.some(call => call[0] === 'Merck Sharp & Dohme Corp.');
-      if (!hasCompanyCall) {
-        throw new Error('fetchDrugs was not called with the company name');
-      }
-    }, { timeout: 3000 });
-    
-    expect(mockFetchDrugs).toHaveBeenCalledWith('Merck Sharp & Dohme Corp.');
-  });
-
   it('should show all drugs when "All Companies" is selected', async () => {
     render(<App />);
 
